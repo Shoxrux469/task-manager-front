@@ -2,28 +2,9 @@ import { useState, FormEvent } from "react";
 import axios from "axios";
 
 export default function TaskForm() {
-  const [title, setTitle] = useState<string>("");
   const [taskId, setTaskId] = useState<string>("");
   const [newTitle, setNewTitle] = useState<string>("");
   const [completed, setCompleted] = useState<boolean>(false);
-
-  // POST-запрос для добавления новой задачи
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    try {
-      const response = await axios.post("http://localhost:5000/api/tasks", {
-        title,
-      });
-      console.log("Task added:", response.data);
-      setTitle("");
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error("Error adding task:", error.response?.data);
-      } else {
-        console.error("Error:", error);
-      }
-    }
-  };
 
   // PATCH-запрос для обновления задачи
   const handleUpdate = async (e: FormEvent) => {
@@ -54,42 +35,39 @@ export default function TaskForm() {
   };
 
   return (
-    <div>
-      <form onSubmit={handleSubmit}>
+    <div className="p-6 bg-gray-50 rounded-lg shadow-md w-full max-w-lg mx-auto">
+      <h2 className="text-2xl font-semibold mb-4 text-center text-gray-700">
+        Update Task
+      </h2>
+      <form onSubmit={handleUpdate} className="flex flex-col space-y-4">
         <input
           type="text"
-          placeholder="Введите название задачи"
-          value={title}
-          className="border border-black rounded"
-          onChange={(e) => setTitle(e.target.value)}
-        />
-        <button type="submit">Добавить задачу</button>
-      </form>
-
-      <form onSubmit={handleUpdate} className="mt-4">
-        <input
-          type="text"
-          placeholder="ID задачи для обновления"
+          placeholder="Task ID for updating"
           value={taskId}
-          className="border border-black rounded mr-2"
+          className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
           onChange={(e) => setTaskId(e.target.value)}
         />
         <input
           type="text"
-          placeholder="Новое название задачи"
+          placeholder="New Task Title"
           value={newTitle}
-          className="border border-black rounded"
+          className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
           onChange={(e) => setNewTitle(e.target.value)}
         />
-        <label className="ml-2">
+        <label className="flex items-center space-x-2">
           <input
             type="checkbox"
             checked={completed}
             onChange={(e) => setCompleted(e.target.checked)}
+            className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
           />
+          <span className="text-gray-600">Mark as completed</span>
         </label>
-        <button type="submit" className="ml-2">
-          Обновить задачу
+        <button
+          type="submit"
+          className="p-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition duration-300"
+        >
+          Update Task
         </button>
       </form>
     </div>

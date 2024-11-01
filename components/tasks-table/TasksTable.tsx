@@ -10,38 +10,47 @@ import {
   TableRow,
 } from "../ui/table";
 
-// Updated ITask interface
 interface ITask {
-  _id: string; // Changed from id to _id
+  _id: string;
   title: string;
   createdAt: string;
-  completed: boolean; // Changed from status to completed
+  completed: boolean;
 }
 
-const getStatusText = (status: boolean): string => {
-  return status ? "Complete" : "Incomplete";
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  return isNaN(date.getTime())
+    ? "Invalid date"
+    : date.toISOString().split("T")[0];
 };
+
+const getStatusText = (status: boolean): string =>
+  status ? "Complete" : "Incomplete";
 
 export function TasksTable() {
   const [tasks, setTasks] = useState<ITask[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchTasks = async () => {
       try {
         const response = await axios.get("http://localhost:5000/api/tasks");
         setTasks(response.data);
-        console.log(response.data);
       } catch (error) {
         console.error("Error fetching tasks:", error);
+      } finally {
+        setLoading(false);
       }
     };
     fetchTasks();
   }, []);
 
+  if (loading) return <p className="text-center py-4">Loading tasks...</p>;
+
   return (
-    <Table className="min-w-full bg-white border shadow-md">
+    <Table className="w-full bg-white shadow-lg rounded-lg overflow-hidden">
       <TableHeader>
-        <TableRow className="bg-gray-50">
+        <TableRow className="bg-blue-100">
           <TableHead>Task ID</TableHead>
           <TableHead>Title</TableHead>
           <TableHead>Date</TableHead>
@@ -50,24 +59,22 @@ export function TasksTable() {
       </TableHeader>
       <TableBody>
         {tasks.map((task) => (
-          <TableRow key={task._id} className="border-t">
-            <TableCell className="font-medium">{task._id}</TableCell>
-            <TableCell>{task.title}</TableCell>
-            <TableCell>
-              {(() => {
-                const date = new Date(task.createdAt);
-                // Check if the date is valid
-                if (isNaN(date.getTime())) {
-                  console.error("Invalid date value:", task.createdAt);
-                  return "Invalid date";
-                }
-                return date.toISOString().split("T")[0];
-              })()}
+          <TableRow key={task._id} className="border-t hover:bg-blue-50">
+            <TableCell className="p-4 font-medium text-gray-700">
+              {task._id}
             </TableCell>
-            <TableCell>
+            <TableCell className="p-4 text-gray-600">{task.title}</TableCell>
+            <TableCell className="p-4 text-gray-500">
+              {formatDate(task.createdAt)}
+            </TableCell>
+            <TableCell className="p-4">
               <Badge
                 variant={task.completed ? "default" : "secondary"}
-                className="px-2 py-1 text-xs font-semibold rounded-full"
+                className={`px-3 py-1 text-xs font-semibold rounded-full ${
+                  task.completed
+                    ? "bg-green-100 text-green-700"
+                    : "bg-yellow-100 text-yellow-700"
+                }`}
               >
                 {getStatusText(task.completed)}
               </Badge>
